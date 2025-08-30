@@ -1,0 +1,33 @@
+{% extends "quotes/base.html" %}
+{% block title %}Модерация — Пользователи{% endblock %}
+
+{% block content %}
+  <h2>Пользователи</h2>
+  {% for u, qs in users_data %}
+    <div class="card" style="margin-bottom:.75rem;">
+      <div>
+        <strong>{{ u.username }}</strong>
+        {% if u.is_staff %}<span class="muted">(staff)</span>{% endif %}
+      </div>
+      <div class="muted">Зарегистрирован: {{ u.date_joined|date:"d.m.Y H:i" }}</div>
+
+      {% if qs %}
+        <div style="margin-top:.5rem;">
+          <div class="muted">Цитаты пользователя:</div>
+          <ul>
+            {% for q in qs %}
+              <li>
+                “{{ q.text|truncatechars:70 }}”
+                <span class="muted">• {{ q.source.name }} • {{ q.get_status_display }} • {{ q.created_at|date:"d.m.Y" }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% else %}
+        <div class="muted" style="margin-top:.5rem;">Цитат пока нет.</div>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p>Пользователи не найдены.</p>
+  {% endfor %}
+{% endblock %}

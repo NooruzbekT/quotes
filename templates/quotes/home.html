@@ -1,0 +1,24 @@
+{% extends "quotes/base.html" %}
+{% block title %}Случайная цитата{% endblock %}
+{% block content %}
+  {% if quote %}
+    <div class="card">
+      <blockquote style="font-size:1.25rem; margin:0 0 1rem 0;">“{{ quote.text }}”</blockquote>
+      <div class="muted">
+        Источник: {{ quote.source.name }} • Вес: {{ quote.weight }} • Просмотров: {{ quote.views }} • Лайков: {{ quote.likes }}
+      </div>
+      <div style="margin-top: .75rem;">
+        <form class="inline" method="post" action="{% url 'quotes:react' quote.pk %}">{% csrf_token %}
+          <input type="hidden" name="action" value="like" />
+          <button type="submit">👍 Лайк</button>
+        </form>
+        <form class="inline" method="post" action="{% url 'quotes:react' quote.pk %}">{% csrf_token %}
+          <input type="hidden" name="action" value="dislike" />
+          <button type="submit">👎 Дизлайк</button>
+        </form>
+      </div>
+    </div>
+  {% else %}
+    <p>Пока нет утверждённых цитат. Добавьте первую!</p>
+  {% endif %}
+{% endblock %}

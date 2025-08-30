@@ -1,0 +1,109 @@
+{% extends "quotes/base.html" %}
+{% block title %}Модерация — Очередь{% endblock %}
+
+{% block content %}
+  <h2>Цитаты на модерации</h2>
+
+  {% for q, form in queue_items %}
+    <div class="card" style="margin-bottom:.75rem;">
+      <div style="font-size:1.05rem;">“{{ q.text }}”</div>
+      <div class="muted">
+        Источник: {{ q.source.name }} • Вес: {{ q.weight }} • Автор: {{ q.author.username }} • Добавлена: {{ q.created_at|date:"d.m.Y H:i" }}
+      </div>
+
+      <form method="post" action="{% url 'quotes:moderation_quote_approve' q.pk %}" style="margin-top:.5rem;">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+
+        <div style="margin-bottom:.5rem;">
+          {{ form.weight.label_tag }} {{ form.weight }}
+          {% if form.weight.errors %}
+            <div class="errorlist">{{ form.weight.errors }}</div>
+          {% endif %}
+        </div>
+
+        <div style="margin-bottom:.5rem;">
+          {{ form.tags.label_tag }} {{ form.tags }}
+          {% if form.tags.errors %}
+            <div class="errorlist">{{ form.tags.errors }}</div>
+          {% endif %}
+        </div>
+
+        <button type="submit">✅ Утвердить</button>
+      </form>
+
+      <form method="post" action="{% url 'quotes:moderation_quote_reject' q.pk %}" style="margin-top:.5rem;">
+        {% csrf_token %}
+        <input name="reason" placeholder="Причина отклонения (необязательно)" />
+        <button type="submit">❌ Отклонить</button>
+      </form>
+    </div>
+  {% empty %}
+    <p>Нет цитат в очереди.</p>
+  {% endfor %}
+
+<h2 style="margin-top:1.25rem;">Источники в ожидании</h2>
+{% for s in sources %}
+  <div class="card" style="margin-bottom:.75rem;">
+    <div>{{ s.name }}</div>
+    <div class="muted">
+      Создан: {{ s.created_at|date:"d.m.Y H:i" }} • Статус: {{ s.get_status_display }}
+    </div>
+
+    <form method="post" action="{% url 'quotes:moderation_source_approve' s.pk %}" class="inline">
+      {% csrf_token %}
+      <button type="submit">✅ Утвердить</button>
+    </form>
+
+    <form method="post" action="{% url 'quotes:moderation_source_reject' s.pk %}" class="inline">
+      {% csrf_token %}
+      <button type="submit">❌ Отклонить</button>
+    </form>
+
+    {# ОБЪЕДИНЕНИЕ ПО НАЗВАНИЮ #}
+    <form method="post" action="{% url 'quotes:moderation_source_merge' s.pk %}" class="inline" style="margin-left:.25rem;">
+      {% csrf_token %}
+      <input name="target_name"
+             list="sources-list"
+             placeholder="Правильное название источника"
+             style="width:260px;"
+             required />
+      <button type="submit">🔀 Объединить</button>
+    </form>
+  </div>
+{% empty %}
+  <p>Нет источников в ожидании.</p>
+{% endfor %}
+
+{# список подсказок для поля target_name #}
+<datalist id="sources-list">
+  {% for it in all_sources %}
+    <option value="{{ it.name }}"></option>
+  {% endfor %}
+</datalist>
+
+  <h2 style="margin-top:1.25rem;">Добавить тег</h2>
+  <form method="post" action="{% url 'quotes:add_tag' %}">
+    {% csrf_token %}
+    <input type="text" name="name" placeholder="Название нового тега" style="width:240px;" />
+    <button type="submit">➕ Добавить</button>
+  </form>
+
+  {# необязательный стиль для ошибок #}
+  <style>
+    .errorlist { color: #b30000; margin-top: .25rem; }
+  </style>
+{% endblock %}
+
+<script>
+document.querySelectorAll("form").forEach(form => {
+  form.addEventListener("submit", function(event) {
+    const checkboxes = form.querySelectorAll("input[type=checkbox][name=tags]");
+    const isChecked = Array.from(checkboxes).some(cb => cb.checked);
+    if (!isChecked) {
+      alert("Нужно выбрать хотя бы один тег!");
+      event.preventDefault();
+    }
+  });
+});
+</script>

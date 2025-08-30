@@ -1,0 +1,39 @@
+{% extends "quotes/base.html" %}
+{% block title %}Топ-10 цитат{% endblock %}
+{% block content %}
+  <h2>Топ-10 по лайкам</h2>
+
+  <!-- фильтр по тегам -->
+  <form method="get" action="{% url 'quotes:top' %}" style="margin-bottom: 1rem;">
+    <label for="tag">Фильтр по тегу:</label>
+    <select name="tag" id="tag" onchange="this.form.submit()">
+      <option value="">Все</option>
+      {% for t in tags %}
+        <option value="{{ t.id }}" {% if selected_tag == t.id %}selected{% endif %}>
+          {{ t.name }}
+        </option>
+      {% endfor %}
+    </select>
+  </form>
+
+  {% for q in quotes %}
+    <div class="card" style="margin-bottom: .75rem;">
+      <div>“{{ q.text }}”</div>
+      <div class="muted">
+        Источник: {{ q.source.name }} • 👍 {{ q.likes }} • 👀 {{ q.views }}
+      </div>
+
+      {% if q.tags.all %}
+        <div style="margin-top: .25rem;">
+          {% for tag in q.tags.all %}
+            <span style="display:inline-block; background:#eee; border-radius:4px; padding:2px 6px; margin-right:4px; font-size: 0.85em;">
+              {{ tag.name }}
+            </span>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  {% empty %}
+    <p>Пока пусто.</p>
+  {% endfor %}
+{% endblock %}

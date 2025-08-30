@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <title>{% block title %}Quotes{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {% load static %}
+    <style>
+      body { max-width: 840px; margin: 2rem auto; font: 16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+      header a { margin-right: 1rem; }
+      .card { border: 1px solid #ddd; padding: 1rem 1.25rem; border-radius: 10px; }
+      .muted { color: #666; font-size: .95rem; }
+      button { cursor: pointer; }
+      form.inline { display: inline; margin-right: .5rem; }
+      .right { float: right; }
+      .linklike { background:none; border:none; padding:0; text-decoration:underline; cursor:pointer; color:#00f; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <a href="{% url 'quotes:home' %}">Главная</a>
+      <a href="{% url 'quotes:top' %}">Топ-10</a>
+      <a href="{% url 'quotes:add' %}">Добавить цитату</a>
+        {% if is_moderator %}
+          <a href="{% url 'quotes:moderation_queue' %}">Модерация</a>
+          <a href="{% url 'quotes:moderation_users' %}">Пользователи</a>
+        {% endif %}
+      {% if request.user.is_authenticated %}
+        <span class="right muted">
+          Вы: {{ request.user.username }}
+          &nbsp;|&nbsp;
+          <form class="inline" method="post" action="{% url 'quotes:logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="linklike">Выйти</button>
+          </form>
+        </span>
+      {% else %}
+        <span class="right">
+          <a href="{% url 'quotes:login' %}">Войти</a> /
+          <a href="{% url 'quotes:register' %}">Регистрация</a>
+        </span>
+      {% endif %}
+    </header>
+    <hr />
+    {% if messages %}
+      <ul>
+        {% for m in messages %}
+          <li>{{ m }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </body>
+</html>
