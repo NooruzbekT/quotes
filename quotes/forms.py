@@ -51,7 +51,6 @@ class ModeratorQuoteApproveForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # подтягиваем все теги для выбора
         self.fields["tags"].queryset = Tag.objects.all()
 
         # проставляем дефолт для weight

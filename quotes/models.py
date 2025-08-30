@@ -7,7 +7,6 @@ from django.utils import timezone
 
 # --------- helpers ---------
 def _collapse_spaces(s: str) -> str:
-    # trim + collapse any whitespace runs into single spaces
     return " ".join(s.split())
 
 
@@ -16,7 +15,6 @@ def normalize_source_name(name: str) -> str:
 
 
 def normalize_quote_text(text: str) -> str:
-    # можно расширить (удаление невидимых символов, юникод-нормализация и т.п.)
     return _collapse_spaces(text).strip()
 
 
@@ -96,14 +94,11 @@ class Quote(models.Model):
         REJECTED = "rejected", "Rejected"
 
     text = models.TextField(unique=False)
-    # нормализованный вариант — для уникальности и поиска дублей
     text_normalized = models.TextField(unique=True, db_index=True)
-
     source = models.ForeignKey(
         Source, on_delete=models.CASCADE, related_name="quotes"
     )
 
-    # вес влияет только на вероятность показа случайной цитаты
     weight = models.PositiveIntegerField(
         default=1,
         validators=[MinValueValidator(1), MaxValueValidator(10)],
@@ -137,7 +132,6 @@ class Quote(models.Model):
             if self.source.status != Source.Status.APPROVED:
                 raise ValidationError("Нельзя утвердить цитату: её источник ещё не утверждён.")
 
-        # если переводим в APPROVED — проверяем лимит 3/источник (считаем только утверждённые)
         if self.status == self.Status.APPROVED and self.source_id:
             approved_qs = Quote.objects.filter(
                 source_id=self.source_id, status=self.Status.APPROVED
@@ -148,7 +142,6 @@ class Quote(models.Model):
         
 
     def save(self, *args, **kwargs):
-        # гарантируем нормализацию и валидации модели
         self.clean()
         super().save(*args, **kwargs)
 

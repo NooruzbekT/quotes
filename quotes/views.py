@@ -35,7 +35,6 @@ def react(request, pk: int):
 
     quote = get_object_or_404(Quote, pk=pk)
     register_reaction(quote_id=quote.pk, action=action)
-    # вернёмся на главную (можно заменить на HttpResponse для ajax)
     return redirect(request.META.get("HTTP_REFERER") or "quotes:home")
 
 
@@ -94,7 +93,7 @@ def register(request):
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)  # авто-логин после регистрации
+            login(request, user)
             return redirect("quotes:home")
     else:
         form = UserCreationForm()
